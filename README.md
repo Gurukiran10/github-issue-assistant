@@ -5,7 +5,7 @@
 **GitHub Issue Assistant** is an AI-powered web application that analyzes GitHub issues using Large Language Models (LLMs) and provides structured, actionable insights. Built with Python, FastAPI, and Streamlit, it demonstrates modern AI integration, full-stack development, and engineering best practices.
 
 ### Key Features
-- 🔍 **AI-Powered Analysis**: Uses Google Gemini API for intelligent issue analysis
+- 🔍 **AI-Powered Analysis**: Uses Groq API (Llama 3.3 70B) for fast, intelligent issue analysis
 - 🎯 **Structured Output**: Generates JSON with summary, priority, labels, and impact assessment
 - 🚀 **Fast & Efficient**: Streamlined architecture using FastAPI and Streamlit
 - ⚡ **Production-Ready**: Includes error handling, validation, and edge case management
@@ -20,9 +20,30 @@
 |-----------|------------|
 | **Backend** | FastAPI, Python 3.9+ |
 | **Frontend** | Streamlit |
-| **LLM Integration** | Google Gemini API (via `google-generativeai`) |
+| **LLM Integration** | Groq API (Llama 3.3 70B via `groq` SDK) |
 | **API Calls** | Requests library |
 | **Testing** | Pytest |
+
+---
+
+## ✅ Requirements Checklist
+
+This project fulfills all SeedlingLabs "Craft" requirements:
+
+- ✅ **Input UI**: GitHub repository URL and issue number fields
+- ✅ **Backend API**: FastAPI endpoint at `/analyze` 
+- ✅ **GitHub Integration**: Fetches title, body, and comments via GitHub API
+- ✅ **LLM Core**: Uses Groq (Llama 3.3 70B) for intelligent analysis
+- ✅ **Structured JSON Output**: Exact required format:
+  - `summary`: One-sentence overview
+  - `type`: Classification (bug, feature_request, documentation, question, other)
+  - `priority_score`: 1-5 with justification
+  - `suggested_labels`: 2-3 relevant GitHub labels
+  - `potential_impact`: Brief user impact statement
+- ✅ **Output Display**: Beautiful Streamlit UI with multiple tabs
+- ✅ **Comprehensive README**: < 5 min setup with clear instructions
+- ✅ **Production-Ready**: Error handling, edge case management, logging
+- ✅ **Extra Features**: Caching, mock fallback, health endpoint, copy-to-clipboard
 
 ---
 
@@ -50,10 +71,13 @@ seedlinglabs-issue-assistant/
 ## ⚙️ Quick Setup (Under 5 Minutes)
 
 ### Prerequisites
-- Python 3.9 or higher
-- Git
-- A Google Gemini API key (free tier available at [Google AI Studio](https://makersuite.google.com/app/apikey))
-- (Optional) GitHub personal access token for higher API rate limits
+- **Python 3.9 or higher**
+- **Git** for version control  
+- **Groq API Key** (FREE - sign up at [Groq Console](https://console.groq.com))
+  - Includes unlimited access to Llama 3.3 70B model
+  - No credit card required
+  - High rate limits (perfect for development)
+- **(Optional) GitHub Personal Access Token** for higher API rate limits
 
 ### Step 1: Clone and Setup
 ```bash
@@ -79,29 +103,36 @@ pip install -r requirements.txt
 
 ### Step 3: Configure Environment
 ```bash
-# Copy example environment file
-cp backend\.env.example backend\.env
+# Create .env file in project root
+echo GROQ_API_KEY=your_groq_api_key_here > .env
 
-# Edit backend/.env and add your credentials:
-# GOOGLE_API_KEY=your_google_api_key_here
-# GITHUB_TOKEN=your_github_token_here (optional)
+# (Optional) Add GitHub token
+echo GITHUB_TOKEN=your_github_token_here >> .env
 ```
+
+**Getting Your Groq API Key:**
+1. Visit [https://console.groq.com](https://console.groq.com)
+2. Sign up (free, no credit card required)
+3. Go to API Keys section
+4. Generate new API key
+5. Copy and paste into `.env` file as `GROQ_API_KEY`
 
 ### Step 4: Run the Application
 
 **Terminal 1 - Start Backend API:**
 ```bash
-cd backend
-python main.py
+# From project root
+python backend/main.py
 ```
-The API will be available at `http://localhost:8000`
+✅ API available at `http://localhost:8000`
+✅ Health check: `GET http://localhost:8000/health`
 
-**Terminal 2 - Start Frontend:**
+**Terminal 2 - Start Frontend (New Terminal):**
 ```bash
-cd frontend
-streamlit run app.py
+# From project root
+streamlit run frontend/app.py
 ```
-The UI will open at `http://localhost:8501`
+✅ UI available at `http://localhost:8501`
 
 ### Step 5: Use the Application
 1. Open the Streamlit app in your browser
@@ -195,32 +226,30 @@ Supports multiple GitHub URL formats:
 ## 🔧 Configuration
 
 ### Environment Variables
-Create a `backend/.env` file with:
+Create a `.env` file in project root with:
 
 ```env
-# Required: Google Gemini API Key
-GOOGLE_API_KEY=your_key_here
+# Required: Groq API Key
+GROQ_API_KEY=gsk_your_api_key_here
 
-# Optional: GitHub Personal Access Token
-GITHUB_TOKEN=your_token_here
-
-# Optional: API Configuration
-ENVIRONMENT=development
-DEBUG=True
+# Optional: GitHub Personal Access Token (for higher rate limits)
+GITHUB_TOKEN=ghp_your_token_here
 ```
 
 ### Obtaining API Keys
 
-**Google Gemini API:**
-1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Click "Create API Key"
-3. Copy the generated key to `GOOGLE_API_KEY`
+**Groq API Key (FREE):**
+1. Visit [Groq Console](https://console.groq.com)
+2. Sign up with email (no credit card needed)
+3. Navigate to API Keys section
+4. Click "Create API Key"
+5. Copy the key and add to `.env` as `GROQ_API_KEY`
 
-**GitHub Token (Optional):**
+**GitHub Token (Optional but Recommended):**
 1. Go to [GitHub Settings → Developer Settings → Personal Access Tokens](https://github.com/settings/tokens)
 2. Click "Generate new token"
-3. Select `repo` scope
-4. Copy the token to `GITHUB_TOKEN`
+3. Select `repo` scope (minimal permissions)
+4. Copy token to `.env` as `GITHUB_TOKEN`
 
 ---
 
