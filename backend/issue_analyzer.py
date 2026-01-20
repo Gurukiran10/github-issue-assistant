@@ -10,6 +10,7 @@ import requests
 from typing import Dict, Any
 import google.generativeai as genai
 import os
+from cache import get_cache
 
 logger = logging.getLogger(__name__)
 
@@ -212,6 +213,15 @@ IMPORTANT:
         Returns:
             Structured analysis dictionary
         """
+        cache = get_cache()
+        cache_key = cache.generate_key(repo_url, issue_number)
+        
+        # Check cache first
+        cached_result = cache.get(cache_key)
+        if cached_result:
+            logger.info(f"Returning cached analysis for {repo_url}#{issue_number}")
+            return cached_result
+        
         logger.info(f"Starting analysis for {repo_url}#{issue_number}")
         
         # Parse repository URL
@@ -238,5 +248,8 @@ IMPORTANT:
         # Parse and validate response
         analysis = self.parse_llm_response(response_text)
         logger.info("Successfully parsed and validated analysis")
+        
+        # Cache the result (1 hour TTL)
+        cache.set(cache_key, analysis, ttl_seconds=3600)
         
         return analysis

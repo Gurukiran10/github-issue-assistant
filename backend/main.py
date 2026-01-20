@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import logging
 from issue_analyzer import IssueAnalyzer
+from cache import get_cache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +42,12 @@ class IssueAnalysis(BaseModel):
     priority_score: str
     suggested_labels: list
     potential_impact: str
+
+
+class StatsResponse(BaseModel):
+    cached_items: int
+    version: str
+    status: str
 
 
 @app.get("/")
@@ -88,6 +95,25 @@ async def health_check():
         "service": "GitHub Issue Assistant API",
         "version": "1.0.0"
     }
+
+
+@app.get("/stats", response_model=StatsResponse)
+async def get_stats():
+    """Get API statistics and cache status"""
+    cache = get_cache()
+    return StatsResponse(
+        cached_items=len(cache.cache),
+        version="1.0.0",
+        status="operational"
+    )
+
+
+@app.post("/cache/clear")
+async def clear_cache():
+    """Clear the analysis cache"""
+    cache = get_cache()
+    cache.clear()
+    return {"message": "Cache cleared successfully"}
 
 
 if __name__ == "__main__":

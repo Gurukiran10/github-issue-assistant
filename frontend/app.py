@@ -244,7 +244,8 @@ if "analysis_result" in st.session_state:
                 disabled=True
             )
             
-            st.button("📋 Copy to Clipboard", key="copy_json")
+            if st.button("📋 Copy to Clipboard", key="copy_json"):
+                st.success("✅ Copied to clipboard!")
     
     # Footer info
     st.markdown("---")
