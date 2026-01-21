@@ -49,6 +49,7 @@ class IssueAnalysis(BaseModel):
     priority_score: str
     suggested_labels: list
     potential_impact: str
+    reasoning: str
 
 
 class StatsResponse(BaseModel):

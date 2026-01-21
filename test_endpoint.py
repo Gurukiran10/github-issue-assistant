@@ -31,11 +31,14 @@ try:
         print("="*60)
         
         # Verify all required fields
-        required_fields = ['summary', 'type', 'priority_score', 'suggested_labels', 'potential_impact']
+        required_fields = ['summary', 'type', 'priority_score', 'suggested_labels', 'potential_impact', 'reasoning']
         print("\nField Validation:")
         for field in required_fields:
             if field in result:
-                print(f"  ✓ {field}: Present")
+                if field == 'reasoning':
+                    print(f"  ✓ {field}: Present ({result[field][:50]}...)")
+                else:
+                    print(f"  ✓ {field}: Present")
             else:
                 print(f"  ✗ {field}: MISSING")
     else:

@@ -129,7 +129,7 @@ class IssueAnalyzer:
         """
         comments_text = "\n".join([f"- {comment[:200]}" for comment in issue_data["comments"][:5]])
         
-        prompt = f"""Analyze the following GitHub issue and provide a structured analysis.
+        prompt = f"""Analyze the following GitHub issue and provide a structured analysis with an explicit reasoning trail.
 
 ISSUE TITLE: {issue_data['title']}
 
@@ -147,14 +147,16 @@ Based on this information, analyze the issue and respond with ONLY a valid JSON 
   "type": "One of: bug, feature_request, documentation, question, or other",
   "priority_score": "A score from 1 (low) to 5 (critical), formatted as 'X/5: justification'",
   "suggested_labels": ["label1", "label2", "label3"],
-  "potential_impact": "A brief sentence on user impact (especially for bugs)"
+    "potential_impact": "A brief sentence on user impact (especially for bugs)",
+    "reasoning": "Short paragraph explaining why you chose the type, priority, and labels"
 }}
 
 IMPORTANT: 
 - Return ONLY the JSON object, no additional text
 - Ensure priority_score is a string like "3/5: Medium priority due to..."
 - suggested_labels should be 2-3 relevant GitHub labels
-- Be specific and actionable in your analysis"""
+- Be specific and actionable in your analysis
+- reasoning must be concise (2-4 sentences)"""
         
         return prompt
     
@@ -183,9 +185,11 @@ IMPORTANT:
             raise ValueError(f"Invalid JSON in LLM response: {str(e)}")
         
         # Validate required fields
-        required_fields = ["summary", "type", "priority_score", "suggested_labels", "potential_impact"]
+        required_fields = ["summary", "type", "priority_score", "suggested_labels", "potential_impact", "reasoning"]
+        if "reasoning" not in data:
+            data["reasoning"] = "Reasoning not returned by model; defaulting to summary rationale."
         missing_fields = [f for f in required_fields if f not in data]
-        
+
         if missing_fields:
             raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
         
@@ -240,7 +244,8 @@ IMPORTANT:
                 "type": "bug",
                 "priority_score": "3/5: Requires investigation",
                 "suggested_labels": ["needs-investigation", "api-error"],
-                "potential_impact": "Issue data unavailable; manual review recommended."
+                "potential_impact": "Issue data unavailable; manual review recommended.",
+                "reasoning": "GitHub API failed; returning a conservative placeholder so the workflow continues without blocking." 
             }
             cache.set(cache_key, analysis, ttl_seconds=3600)
             return analysis
@@ -274,7 +279,8 @@ IMPORTANT:
                     "type": "bug",
                     "priority_score": "4/5: High impact for concurrent rendering users",
                     "suggested_labels": ["bug", "concurrent-mode", "crash"],
-                    "potential_impact": "Affects apps migrating to concurrent features; unexpected crashes during render."
+                    "potential_impact": "Affects apps migrating to concurrent features; unexpected crashes during render.",
+                    "reasoning": "Using a cached exemplar because the LLM hit rate limits; the example mirrors a realistic high-priority crash scenario."
                 }
             else:
                 raise ValueError(f"Failed to generate analysis: {err_msg}")
