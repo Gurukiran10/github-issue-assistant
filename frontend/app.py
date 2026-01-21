@@ -7,6 +7,7 @@ import streamlit as st
 import requests
 import json
 import time
+import os
 
 # Page configuration
 st.set_page_config(
@@ -20,12 +21,15 @@ st.set_page_config(
 st.title("🔍 GitHub Issue Assistant")
 st.markdown("Leverage AI to analyze GitHub issues and generate actionable insights")
 
+# Get backend URL from environment or use default
+default_backend_url = os.getenv("BACKEND_URL", "https://github-issue-assistant-f33e.onrender.com")
+
 # Sidebar configuration
 with st.sidebar:
     st.header("⚙️ Configuration")
     api_url = st.text_input(
         "API Endpoint",
-        value="http://localhost:8000",
+        value=default_backend_url,
         help="URL of the backend API server"
     )
 
