@@ -32,6 +32,17 @@ with st.sidebar:
         value=default_backend_url,
         help="URL of the backend API server"
     )
+    
+    # Add usage instructions
+    st.markdown("---")
+    st.header("📖 How to Use")
+    st.markdown("""
+    1. **Paste a URL**: Enter a public GitHub repository link.
+    2. **Issue Number**: Specify the ID of the issue you want to analyze.
+    3. **Analyze**: Click the 'Analyze' button to start the AI engine.
+    4. **Explore Tabs**: View the summary, metrics, and labels, or copy the raw JSON.
+    """)
+    st.info("💡 Tip: Use full URLs like 'https://github.com/facebook/react'")
 
 # Input section
 col1, col2 = st.columns([3, 1])
