@@ -10,7 +10,7 @@ import requests
 from typing import Dict, Any
 from groq import Groq
 import os
-from cache import get_cache
+from .cache import get_cache
 
 logger = logging.getLogger(__name__)
 
