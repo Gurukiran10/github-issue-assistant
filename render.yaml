@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: github-issue-assistant-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        scope: run
+      - key: GOOGLE_API_KEY
+        scope: run
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+  - type: web
+    name: github-issue-assistant-frontend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/app.py --server.address=0.0.0.0 --server.port=$PORT --logger.level=error
+    envVars:
+      - key: STREAMLIT_SERVER_HEADLESS
+        value: "true"
+      - key: STREAMLIT_BROWSER_GATHER_USAGE_STATS
+        value: "false"
+      - key: PYTHONUNBUFFERED
+        value: "1"
