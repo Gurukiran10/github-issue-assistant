@@ -22,7 +22,7 @@ st.title("🔍 GitHub Issue Assistant")
 st.markdown("Leverage AI to analyze GitHub issues and generate actionable insights")
 
 # Get backend URL from environment or use default
-default_backend_url = os.getenv("BACKEND_URL", "https://github-issue-assistant-f33e.onrender.com")
+default_backend_url = os.getenv("BACKEND_URL", "https://github-issue-assistant-backend.onrender.com")
 
 # Sidebar configuration
 with st.sidebar:
