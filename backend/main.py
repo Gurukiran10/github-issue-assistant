@@ -10,8 +10,8 @@ import logging
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from issue_analyzer import IssueAnalyzer
-from cache import get_cache
+from .issue_analyzer import IssueAnalyzer
+from .cache import get_cache
 
 # Load environment variables from .env file (in project root)
 env_path = Path(__file__).parent.parent / '.env'
