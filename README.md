@@ -1,4 +1,142 @@
-# GitHub Issue Assistant - Comprehensive README
+# GitHub Issue Assistant
+
+AI-powered analysis of GitHub issues with a Streamlit frontend and FastAPI backend. Generates concise summaries, type, priority, suggested labels, and impact—plus a ready-to-use JSON blob for automation.
+
+**Live demo**
+- Frontend: https://github-issue-assistant-frontend.onrender.com
+- Backend: https://github-issue-assistant-backend.onrender.com (health: `/health`)
+
+---
+
+## What’s inside
+- Frontend: Streamlit app in [frontend/app.py](frontend/app.py)
+- Backend: FastAPI app in [backend/main.py](backend/main.py) with core logic in [backend/issue_analyzer.py](backend/issue_analyzer.py)
+- Caching: TTL in-memory cache in [backend/cache.py](backend/cache.py) (analysis cached ~1 hour)
+- Model: Groq Llama 3.3 70B via `groq` SDK
+- Deployment: Render (free tier) for both services
+
+---
+
+## Features recruiters care about
+- Structured AI output: summary, type, priority with justification, suggested labels, impact, JSON copy/download
+- Robust input handling: URL + issue validation, graceful errors, health endpoint, stats endpoint, cache clear endpoint
+- Fast UX: client-side state, cached analysis responses, success/error toasts, JSON copy helper
+- Deployment ready: env-based config, CORS, health checks, cold-start tolerant
+- Extensible: optional GitHub token to avoid rate limits, pluggable model/provider
+
+---
+
+## Quickstart (local)
+
+Prereqs: Python 3.11+, pip, Git, Groq API key.
+
+```bash
+git clone https://github.com/Gurukiran10/github-issue-assistant.git
+cd github-issue-assistant
+
+# (recommended) use a venv
+python -m venv .venv
+.\.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # macOS/Linux
+
+# install deps
+pip install -r backend/requirements.txt
+pip install -r frontend/requirements.txt
+
+# env
+set GROQ_API_KEY=sk_your_key_here          # use export on macOS/Linux
+set BACKEND_URL=http://localhost:8000      # optional; frontend default
+set GITHUB_TOKEN=ghp_your_token_optional   # optional, lifts GitHub rate limits
+
+# run backend (terminal 1)
+uvicorn backend.main:app --reload --port 8000
+
+# run frontend (terminal 2)
+streamlit run frontend/app.py --server.port 8501
+```
+
+Local URLs: frontend http://localhost:8501, backend http://localhost:8000 (health: http://localhost:8000/health).
+
+---
+
+## API
+
+**POST /analyze**
+```json
+{
+  "repo_url": "https://github.com/facebook/react",
+  "issue_number": 1
+}
+```
+Response
+```json
+{
+  "summary": "Run each test in its own iframe to improve test isolation",
+  "type": "feature_request",
+  "priority_score": "2/5: Low priority due to non-blocking nature and existing workaround",
+  "suggested_labels": ["test-improvement", "performance", "refactoring"],
+  "potential_impact": "Improved test reliability and isolation for users",
+  "reasoning": "I chose feature_request ..."
+}
+```
+
+Other endpoints
+- `GET /health` – liveness
+- `GET /stats` – basic service stats
+- `POST /cache/clear` – drop cached analyses
+
+---
+
+## Frontend UX (Streamlit)
+- Config sidebar: API endpoint (defaults to deployed backend), usage steps, tip for full URLs
+- Inputs: repo URL, issue number, analyze button with loading state
+- Tabs: Summary, Metrics, Labels, JSON (with copy helper)
+- Status toasts: success/error, inline validation
+
+---
+
+## Backend notes
+- Core flow: parse repo → fetch issue + comments (GitHub API) → build prompt → call Groq → validate/normalize JSON → respond
+- Caching: key = repo + issue; TTL ~3600s; stored in-memory via [backend/cache.py](backend/cache.py)
+- Error handling: 400 on bad input, descriptive errors on fetch/LLM failures, guarded JSON parsing
+
+---
+
+## Deployment (Render)
+- Backend service command: `uvicorn backend.main:app --host 0.0.0.0 --port 8000`
+- Frontend service command: `streamlit run frontend/app.py --server.port 10000 --server.address 0.0.0.0`
+- Env vars (set in Render dashboard): `GROQ_API_KEY`, `BACKEND_URL` (optional; frontend defaults to deployed backend), optional `GITHUB_TOKEN`
+- Live URLs: frontend https://github-issue-assistant-frontend.onrender.com, backend https://github-issue-assistant-backend.onrender.com
+
+---
+
+## Validation & testing
+- Manual E2E: verified with multiple repos/issues (React, VS Code, Python, Node.js, invalid repo) returning correct JSON and UI rendering
+- Health checks: `/health` monitored via Render
+- Cache behavior: TTL-based hits validated locally
+
+---
+
+## Roadmap / extras to impress
+- Light/dark theme toggle + accent color palette
+- Persist user settings (endpoint, last repo/issue) via session/query params
+- Batch analyze multiple issues; CSV/Markdown export; download JSON
+- Inline GitHub issue link parsing (paste issue URL directly)
+- Observability: request latency, cache hit/miss, `/version` endpoint, UI status bar
+- Resilience: retries with backoff for GitHub/LLM
+
+---
+
+## Troubleshooting
+- See 400 “Bad Request”: verify repo URL includes `github.com` and issue number ≥ 1
+- GitHub rate limit: add `GITHUB_TOKEN`
+- LLM error/timeout: retry; cached results return instantly if available
+- Wrong backend URL in UI: use sidebar config or set `BACKEND_URL`
+
+---
+
+## License
+MIT# GitHub Issue Assistant - Comprehensive README
 
 ## 🚀 Overview
 
