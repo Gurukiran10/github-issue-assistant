@@ -1,74 +1,119 @@
 # GitHub Issue Assistant
 
-AI-powered analysis of GitHub issues with a Streamlit frontend and FastAPI backend. Generates concise summaries, type, priority, suggested labels, and impact—plus a ready-to-use JSON blob for automation.
+AI-powered analysis of GitHub issues with a Streamlit frontend and FastAPI backend. Generates concise summaries, type, priority, suggested labels, impact, and a ready-to-use JSON blob.
 
-**Live demo**
-- Frontend: https://github-issue-assistant-frontend.onrender.com
-- Backend: https://github-issue-assistant-backend.onrender.com (health: `/health`)
+**🌐 Live Demo**
+- **Frontend**: https://github-issue-assistant-frontend.onrender.com
+- **Backend API**: https://github-issue-assistant-backend.onrender.com
+  - Health check: https://github-issue-assistant-backend.onrender.com/health
 
----
-
-## What’s inside
-- Frontend: Streamlit app in [frontend/app.py](frontend/app.py)
-- Backend: FastAPI app in [backend/main.py](backend/main.py) with core logic in [backend/issue_analyzer.py](backend/issue_analyzer.py)
-- Caching: TTL in-memory cache in [backend/cache.py](backend/cache.py) (analysis cached ~1 hour)
-- Model: Groq Llama 3.3 70B via `groq` SDK
-- Deployment: Render (free tier) for both services
+> **💡 For recruiters**: The live frontend is pre-configured with the deployed backend URL (`https://github-issue-assistant-backend.onrender.com`). You can start analyzing GitHub issues immediately—just enter a repo URL (like `https://github.com/facebook/react`) and an issue number, then click Analyze. No setup required!
 
 ---
 
-## Features recruiters care about
-- Structured AI output: summary, type, priority with justification, suggested labels, impact, JSON copy/download
-- Robust input handling: URL + issue validation, graceful errors, health endpoint, stats endpoint, cache clear endpoint
-- Fast UX: client-side state, cached analysis responses, success/error toasts, JSON copy helper
-- Deployment ready: env-based config, CORS, health checks, cold-start tolerant
-- Extensible: optional GitHub token to avoid rate limits, pluggable model/provider
+## ✅ Assessment Requirements Met
+
+This project fulfills all SeedlingLabs requirements:
+
+- ✅ **Input UI**: GitHub repository URL and issue number fields
+- ✅ **Backend API**: FastAPI endpoint at `/analyze` 
+- ✅ **GitHub Integration**: Fetches title, body, and comments via GitHub API
+- ✅ **LLM Core**: Uses Groq (Llama 3.3 70B) for intelligent analysis
+- ✅ **Structured JSON Output**: Exact required format with summary, type, priority_score, suggested_labels, potential_impact
+- ✅ **Output Display**: Beautiful Streamlit UI with multiple tabs
+- ✅ **Production-Ready**: Error handling, validation, edge case management
+- ✅ **Deployed to Cloud**: Both services live on Render with auto-deploy from GitHub
+
+**🚀 Extra Features Added**:
+- In-memory TTL cache (~1 hour) for fast repeated queries
+- `/health`, `/stats`, `/cache/clear` endpoints
+- JSON copy helper in UI
+- Sidebar configuration with usage instructions
+- Comprehensive error messages and validation
 
 ---
 
-## Quickstart (local)
+## 🏗️ Tech Stack
 
-Prereqs: Python 3.11+, pip, Git, Groq API key.
+- **Backend**: Python 3.11.7, FastAPI, Pydantic, Uvicorn
+- **Frontend**: Streamlit
+- **LLM**: Groq Llama 3.3 70B via `groq` SDK
+- **Data Source**: GitHub REST API
+- **Caching**: In-memory TTL cache (3600s)
+- **Deployment**: Render (free tier, auto-deploy from GitHub)
+
+---
+
+## 📁 Project Structure
+
+```
+github-issue-assistant/
+├── backend/
+│   ├── main.py              # FastAPI application
+│   ├── issue_analyzer.py    # Core LLM + GitHub logic
+│   ├── cache.py             # In-memory TTL cache
+│   └── requirements.txt     # Backend dependencies
+├── frontend/
+│   ├── app.py               # Streamlit UI
+│   └── requirements.txt     # Frontend dependencies
+├── render.yaml              # Render deployment config
+└── README.md                # This file
+```
+
+---
+
+## ⚡ Quickstart (Local Development)
+
+**Prerequisites**: Python 3.11+, Git, Groq API key (free at [console.groq.com](https://console.groq.com))
 
 ```bash
+# Clone repository
 git clone https://github.com/Gurukiran10/github-issue-assistant.git
 cd github-issue-assistant
 
-# (recommended) use a venv
+# Create virtual environment (recommended)
 python -m venv .venv
-.\.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # macOS/Linux
+.\.venv\Scripts\activate          # Windows
+# source .venv/bin/activate        # macOS/Linux
 
-# install deps
+# Install dependencies
 pip install -r backend/requirements.txt
 pip install -r frontend/requirements.txt
 
-# env
-set GROQ_API_KEY=sk_your_key_here          # use export on macOS/Linux
-set BACKEND_URL=http://localhost:8000      # optional; frontend default
-set GITHUB_TOKEN=ghp_your_token_optional   # optional, lifts GitHub rate limits
+# Set environment variables
+set GROQ_API_KEY=gsk_your_key_here          # use export on macOS/Linux
+set BACKEND_URL=http://localhost:8000       # optional for local dev
+set GITHUB_TOKEN=ghp_your_token_optional    # optional; increases rate limits
 
-# run backend (terminal 1)
+# Start backend (terminal 1)
 uvicorn backend.main:app --reload --port 8000
 
-# run frontend (terminal 2)
+# Start frontend (terminal 2)
 streamlit run frontend/app.py --server.port 8501
 ```
 
-Local URLs: frontend http://localhost:8501, backend http://localhost:8000 (health: http://localhost:8000/health).
+**Local URLs**:
+- Frontend: http://localhost:8501
+- Backend API: http://localhost:8000
+- Health check: http://localhost:8000/health
 
 ---
 
-## API
+## 📡 API Documentation
 
-**POST /analyze**
+### POST /analyze
+
+Analyzes a GitHub issue using AI.
+
+**Request**:
 ```json
 {
   "repo_url": "https://github.com/facebook/react",
   "issue_number": 1
 }
 ```
-Response
+
+**Response**:
 ```json
 {
   "summary": "Run each test in its own iframe to improve test isolation",
@@ -76,533 +121,162 @@ Response
   "priority_score": "2/5: Low priority due to non-blocking nature and existing workaround",
   "suggested_labels": ["test-improvement", "performance", "refactoring"],
   "potential_impact": "Improved test reliability and isolation for users",
-  "reasoning": "I chose feature_request ..."
+  "reasoning": "I chose feature_request because the issue proposes a new approach..."
 }
 ```
 
-Other endpoints
-- `GET /health` – liveness
-- `GET /stats` – basic service stats
-- `POST /cache/clear` – drop cached analyses
+### Other Endpoints
+
+- **GET /health** – Service liveness check
+- **GET /stats** – Basic service statistics  
+- **POST /cache/clear** – Clear cached analyses
 
 ---
 
-## Frontend UX (Streamlit)
-- Config sidebar: API endpoint (defaults to deployed backend), usage steps, tip for full URLs
-- Inputs: repo URL, issue number, analyze button with loading state
-- Tabs: Summary, Metrics, Labels, JSON (with copy helper)
-- Status toasts: success/error, inline validation
+## 🎨 Frontend Features
+
+The Streamlit UI includes:
+
+### Sidebar Configuration
+
+**API Endpoint Field**:
+- Pre-filled with `https://github-issue-assistant-backend.onrender.com` (deployed backend)
+- **For local development**: Change to `http://localhost:8000`
+- **For testing**: You can paste any backend API URL here
+- The frontend will use whatever URL you specify in this field
+
+**Usage Instructions**:
+- Step-by-step guide on how to use the tool
+- Tips for entering GitHub URLs correctly
+
+### Main Interface
+
+- **Repository URL**: Enter full GitHub URL (e.g., `https://github.com/facebook/react`)
+- **Issue Number**: Numeric ID of the issue to analyze
+- **Analyze Button**: Triggers analysis with loading state
+- **Results Tabs**:
+  - **Summary**: One-sentence issue overview
+  - **Metrics**: Type, priority score, potential impact
+  - **Labels**: AI-suggested GitHub labels
+  - **JSON**: Full response with copy button
 
 ---
 
-## Backend notes
-- Core flow: parse repo → fetch issue + comments (GitHub API) → build prompt → call Groq → validate/normalize JSON → respond
-- Caching: key = repo + issue; TTL ~3600s; stored in-memory via [backend/cache.py](backend/cache.py)
-- Error handling: 400 on bad input, descriptive errors on fetch/LLM failures, guarded JSON parsing
+## 🔧 Backend Implementation
+
+**Core Flow**:
+1. Parse repository URL (supports HTTPS, SSH formats)
+2. Fetch issue data from GitHub API (title, body, comments)
+3. Build intelligent prompt for LLM with context
+4. Call Groq API (Llama 3.3 70B)
+5. Parse and validate JSON response
+6. Return structured output
+
+**Caching Strategy**:
+- **Key**: MD5 hash of repo URL + issue number
+- **TTL**: 3600 seconds (1 hour) for analysis results
+- **Storage**: In-memory via [backend/cache.py](backend/cache.py)
+- **Benefit**: Instant responses for repeated queries
+
+**Error Handling**:
+- 400 for invalid inputs (malformed URL, missing issue)
+- Descriptive errors for GitHub API failures (404, rate limits)
+- Graceful fallback for LLM parsing errors
+- Timeout protection on API calls
 
 ---
 
-## Deployment (Render)
-- Backend service command: `uvicorn backend.main:app --host 0.0.0.0 --port 8000`
-- Frontend service command: `streamlit run frontend/app.py --server.port 10000 --server.address 0.0.0.0`
-- Env vars (set in Render dashboard): `GROQ_API_KEY`, `BACKEND_URL` (optional; frontend defaults to deployed backend), optional `GITHUB_TOKEN`
-- Live URLs: frontend https://github-issue-assistant-frontend.onrender.com, backend https://github-issue-assistant-backend.onrender.com
+## 🚀 Deployment (Render)
+
+Both services are deployed on Render's free tier with auto-deploy from GitHub.
+
+**Backend Configuration**:
+- Start command: `uvicorn backend.main:app --host 0.0.0.0 --port 8000`
+- Environment variables (set in Render dashboard):
+  - `GROQ_API_KEY` (required)
+  - `GITHUB_TOKEN` (optional; increases rate limits)
+
+**Frontend Configuration**:
+- Start command: `streamlit run frontend/app.py --server.port 10000 --server.address 0.0.0.0`
+- Environment variables:
+  - `BACKEND_URL` (optional; defaults to deployed backend)
+  - `PYTHONUNBUFFERED=1` (for better logging)
+
+**Live URLs**:
+- Frontend: https://github-issue-assistant-frontend.onrender.com
+- Backend: https://github-issue-assistant-backend.onrender.com
 
 ---
 
-## Validation & testing
-- Manual E2E: verified with multiple repos/issues (React, VS Code, Python, Node.js, invalid repo) returning correct JSON and UI rendering
-- Health checks: `/health` monitored via Render
-- Cache behavior: TTL-based hits validated locally
+## ✅ Testing & Validation
+
+**Manual End-to-End Tests**:
+
+Verified with multiple real-world repositories:
+- ✅ **facebook/react** (React issues) - Feature requests and bugs
+- ✅ **microsoft/vscode** (VS Code issues) - Complex technical issues
+- ✅ **python/cpython** (Python core) - Language improvement proposals
+- ✅ **nodejs/node** (Node.js issues) - Performance and API issues
+- ✅ **Invalid repository** - Error handling verification
+
+All tests returned proper JSON structure with required fields.
+
+**Health Monitoring**:
+- `/health` endpoint monitored by Render
+- Returns service status and version info
+
+**Cache Validation**:
+- TTL-based expiration tested locally
+- Hit/miss behavior verified with repeated requests
+- Cache clear endpoint tested for manual invalidation
 
 ---
 
-## Roadmap / extras to impress
-- Light/dark theme toggle + accent color palette
-- Persist user settings (endpoint, last repo/issue) via session/query params
-- Batch analyze multiple issues; CSV/Markdown export; download JSON
-- Inline GitHub issue link parsing (paste issue URL directly)
-- Observability: request latency, cache hit/miss, `/version` endpoint, UI status bar
-- Resilience: retries with backoff for GitHub/LLM
+## 🐛 Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **400 Bad Request** | Verify repo URL includes `github.com` and issue number ≥ 1 |
+| **GitHub rate limit exceeded** | Add `GITHUB_TOKEN` environment variable |
+| **LLM timeout or error** | Retry the request; cached results return instantly on subsequent tries |
+| **Wrong backend URL in UI** | Update API endpoint in sidebar to `https://github-issue-assistant-backend.onrender.com` (deployed) or `http://localhost:8000` (local) |
+| **Cold start delay (first request slow)** | Normal on Render free tier; takes 30-60s for first request after inactivity |
+| **Frontend shows old API endpoint** | Refresh browser with Ctrl+Shift+R (hard refresh) after deployment updates |
 
 ---
 
-## Troubleshooting
-- See 400 “Bad Request”: verify repo URL includes `github.com` and issue number ≥ 1
-- GitHub rate limit: add `GITHUB_TOKEN`
-- LLM error/timeout: retry; cached results return instantly if available
-- Wrong backend URL in UI: use sidebar config or set `BACKEND_URL`
-
----
-
-## License
-MIT# GitHub Issue Assistant - Comprehensive README
-
-## 🚀 Overview
-
-**GitHub Issue Assistant** is an AI-powered web application that analyzes GitHub issues using Large Language Models (LLMs) and provides structured, actionable insights. Built with Python, FastAPI, and Streamlit, it demonstrates modern AI integration, full-stack development, and engineering best practices.
-
-### Key Features
-- 🔍 **AI-Powered Analysis**: Uses Groq API (Llama 3.3 70B) for fast, intelligent issue analysis
-- 🎯 **Structured Output**: Generates JSON with summary, priority, labels, and impact assessment
-- 🚀 **Fast & Efficient**: Streamlined architecture using FastAPI and Streamlit
-- ⚡ **Production-Ready**: Includes error handling, validation, and edge case management
-- 📊 **Beautiful UI**: Clean, intuitive Streamlit interface for easy interaction
-- 🧪 **Well-Tested**: Comprehensive unit tests for reliability
-
----
-
-## 📋 Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| **Backend** | FastAPI, Python 3.9+ |
-| **Frontend** | Streamlit |
-| **LLM Integration** | Groq API (Llama 3.3 70B via `groq` SDK) |
-| **API Calls** | Requests library |
-| **Testing** | Pytest |
-
----
-
-## ✅ Requirements Checklist
-
-This project fulfills all SeedlingLabs "Craft" requirements:
-
-- ✅ **Input UI**: GitHub repository URL and issue number fields
-- ✅ **Backend API**: FastAPI endpoint at `/analyze` 
-- ✅ **GitHub Integration**: Fetches title, body, and comments via GitHub API
-- ✅ **LLM Core**: Uses Groq (Llama 3.3 70B) for intelligent analysis
-- ✅ **Structured JSON Output**: Exact required format:
-  - `summary`: One-sentence overview
-  - `type`: Classification (bug, feature_request, documentation, question, other)
-  - `priority_score`: 1-5 with justification
-  - `suggested_labels`: 2-3 relevant GitHub labels
-  - `potential_impact`: Brief user impact statement
-- ✅ **Output Display**: Beautiful Streamlit UI with multiple tabs
-- ✅ **Comprehensive README**: < 5 min setup with clear instructions
-- ✅ **Production-Ready**: Error handling, edge case management, logging
-- ✅ **Extra Features**: Caching, mock fallback, health endpoint, copy-to-clipboard
-
----
-
-## 🏗️ Project Structure
-
-```
-seedlinglabs-issue-assistant/
-├── backend/
-│   ├── main.py                 # FastAPI application entry point
-│   ├── issue_analyzer.py       # Core analyzer logic
-│   ├── requirements.txt        # Backend dependencies
-│   └── .env.example           # Environment variables template
-├── frontend/
-│   ├── app.py                 # Streamlit application
-│   └── requirements.txt       # Frontend dependencies
-├── tests/
-│   └── test_analyzer.py       # Unit tests
-├── README.md                  # This file
-├── .gitignore                 # Git ignore rules
-└── requirements.txt           # Combined dependencies
-```
-
----
-
-## ⚙️ Quick Setup (Under 5 Minutes)
-
-### Prerequisites
-- **Python 3.9 or higher**
-- **Git** for version control  
-- **Groq API Key** (FREE - sign up at [Groq Console](https://console.groq.com))
-  - Includes unlimited access to Llama 3.3 70B model
-  - No credit card required
-  - High rate limits (perfect for development)
-- **(Optional) GitHub Personal Access Token** for higher API rate limits
-
-### Step 1: Clone and Setup
-```bash
-# Clone repository
-git clone https://github.com/your-username/seedlinglabs-issue-assistant.git
-cd seedlinglabs-issue-assistant
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-```
-
-### Step 2: Install Dependencies
-```bash
-# Install all dependencies
-pip install -r requirements.txt
-```
-
-### Step 3: Configure Environment
-```bash
-# Create .env file in project root
-echo GROQ_API_KEY=your_groq_api_key_here > .env
-
-# (Optional) Add GitHub token
-echo GITHUB_TOKEN=your_github_token_here >> .env
-```
-
-**Getting Your Groq API Key:**
-1. Visit [https://console.groq.com](https://console.groq.com)
-2. Sign up (free, no credit card required)
-3. Go to API Keys section
-4. Generate new API key
-5. Copy and paste into `.env` file as `GROQ_API_KEY`
-
-### Step 4: Run the Application
-
-**Terminal 1 - Start Backend API:**
-```bash
-# From project root
-python backend/main.py
-```
-✅ API available at `http://localhost:8000`
-✅ Health check: `GET http://localhost:8000/health`
-
-**Terminal 2 - Start Frontend (New Terminal):**
-```bash
-# From project root
-streamlit run frontend/app.py
-```
-✅ UI available at `http://localhost:8501`
-
-### Step 5: Use the Application
-1. Open the Streamlit app in your browser
-2. Enter a GitHub repository URL (e.g., `https://github.com/facebook/react`)
-3. Enter an issue number
-4. Click "Analyze Issue"
-5. View the AI-generated analysis
-
----
-
-## 📊 API Documentation
-
-### Endpoint: POST `/analyze`
-
-Analyzes a GitHub issue using AI.
-
-**Request:**
-```json
-{
-  "repo_url": "https://github.com/facebook/react",
-  "issue_number": 1234
-}
-```
-
-**Response:**
-```json
-{
-  "summary": "A one-sentence summary of the user's problem or request.",
-  "type": "bug",
-  "priority_score": "3/5: Medium priority due to...",
-  "suggested_labels": ["bug", "UI", "performance"],
-  "potential_impact": "This bug could prevent users from..."
-}
-```
-
-**Error Response:**
-```json
-{
-  "detail": "Issue #1234 not found in facebook/react"
-}
-```
-
-### Health Check: GET `/health`
-
-Returns API status.
-
-**Response:**
-```json
-{
-  "status": "healthy",
-  "service": "GitHub Issue Assistant API",
-  "version": "1.0.0"
-}
-```
-
----
-
-## 🎯 Core Features Explained
-
-### 1. Repository URL Parsing
-Supports multiple GitHub URL formats:
-- HTTPS: `https://github.com/owner/repo`
-- HTTPS with .git: `https://github.com/owner/repo.git`
-- SSH: `git@github.com:owner/repo.git`
-
-### 2. GitHub Issue Data Fetching
-- Fetches issue title, body, and comments from GitHub API
-- Supports both public and private repositories (with authentication)
-- Gracefully handles rate limiting and missing data
-
-### 3. Intelligent Prompt Engineering
-- Crafts detailed prompts for consistent LLM output
-- Includes few-shot examples indirectly through prompt structure
-- Enforces JSON format requirement
-- Handles issues with no comments or very long bodies
-
-### 4. Response Validation
-- Validates JSON structure
-- Enforces required fields
-- Type checking and normalization
-- Graceful fallbacks for edge cases
-
-### 5. Error Handling
-- Network error recovery
-- Timeout management
-- Descriptive error messages
-- Logging for debugging
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-Create a `.env` file in project root with:
-
-```env
-# Required: Groq API Key
-GROQ_API_KEY=gsk_your_api_key_here
-
-# Optional: GitHub Personal Access Token (for higher rate limits)
-GITHUB_TOKEN=ghp_your_token_here
-```
-
-### Obtaining API Keys
-
-**Groq API Key (FREE):**
-1. Visit [Groq Console](https://console.groq.com)
-2. Sign up with email (no credit card needed)
-3. Navigate to API Keys section
-4. Click "Create API Key"
-5. Copy the key and add to `.env` as `GROQ_API_KEY`
-
-**GitHub Token (Optional but Recommended):**
-1. Go to [GitHub Settings → Developer Settings → Personal Access Tokens](https://github.com/settings/tokens)
-2. Click "Generate new token"
-3. Select `repo` scope (minimal permissions)
-4. Copy token to `.env` as `GITHUB_TOKEN`
-
----
-
-## 🧪 Testing
-
-Run the test suite:
-```bash
-# Run all tests
-pytest tests/ -v
-
-# Run specific test file
-pytest tests/test_analyzer.py -v
-
-# Run with coverage
-pytest tests/ --cov=backend
-```
-
-### Test Coverage
-- URL parsing (HTTPS, SSH formats)
-- JSON response parsing and validation
-- Error handling
-- Edge cases (missing comments, invalid types)
-
----
-
-## 🚀 Advanced Usage
-
-### Running with Docker (Optional)
-```bash
-# Build and run with docker-compose
-docker-compose up
-
-# Access at http://localhost:8501
-```
-
-### Custom LLM Provider
-To use a different LLM (OpenAI, Anthropic, etc.):
-
-1. Update `backend/issue_analyzer.py`
-2. Modify the `IssueAnalyzer.__init__()` method
-3. Update the API client call in the `analyze()` method
-4. Update `backend/requirements.txt` with new dependencies
-
-Example for OpenAI:
-```python
-from openai import OpenAI
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": prompt}]
-)
-```
-
-### Performance Optimization
-- Cache issue data for repeated analyses
-- Implement batch processing for multiple issues
-- Use connection pooling for API requests
-
----
-
-## 📝 Examples
-
-### Example 1: Bug Report Analysis
-**Input:**
-- Repo: `https://github.com/facebook/react`
-- Issue: `#25000`
-
-**Output:**
-```json
-{
-  "summary": "setState not batching updates properly in strict mode causing performance regression.",
-  "type": "bug",
-  "priority_score": "4/5: Critical - affects core state management",
-  "suggested_labels": ["bug", "performance", "react-18"],
-  "potential_impact": "Could severely impact React applications relying on batched updates."
-}
-```
-
-### Example 2: Feature Request Analysis
-**Input:**
-- Repo: `https://github.com/nodejs/node`
-- Issue: `#45000`
-
-**Output:**
-```json
-{
-  "summary": "Add native support for WebSocket protocol in Node.js core.",
-  "type": "feature_request",
-  "priority_score": "2/5: Low priority - ecosystem solutions exist",
-  "suggested_labels": ["feature-request", "networking"],
-  "potential_impact": "Would provide built-in WebSocket support without external dependencies."
-}
-```
-
----
-
-## 🔍 Troubleshooting
-
-### Issue: "Cannot connect to API"
-- Ensure backend is running: `python backend/main.py`
-- Check if port 8000 is available
-- Verify firewall settings
-
-### Issue: "GOOGLE_API_KEY not set"
-- Create `backend/.env` file
-- Add `GOOGLE_API_KEY=your_key_here`
-- Restart the backend
-
-### Issue: "Issue not found in repository"
-- Verify repository URL format
-- Check issue number exists
-- Ensure repository is public
-
-### Issue: "Timeout error"
-- Issue body might be too large
-- GitHub API might be slow
-- Try again after a minute
-
-### Issue: "Invalid JSON from LLM"
-- LLM occasionally returns malformed JSON
-- Retry the analysis
-- Consider using a different LLM model
-
----
-
-## 📈 Performance Metrics
-
-| Metric | Value |
-|--------|-------|
-| Average Analysis Time | 5-10 seconds |
-| GitHub API Calls | 2 (issue + comments) |
-| Backend Memory Usage | ~150MB |
-| Frontend Memory Usage | ~200MB |
-| Typical Response Size | 2-5 KB |
-
----
-
-## 🎓 Learning Resources
-
-This project demonstrates:
-- **FastAPI**: Modern async Python web framework
-- **Prompt Engineering**: Techniques for reliable LLM output
-- **Error Handling**: Comprehensive exception management
-- **Testing**: Unit tests with pytest
-- **Git Workflow**: Clear commit history
-- **API Integration**: GitHub API and LLM API calls
-- **Full-Stack Development**: Backend + Frontend integration
-- **Environment Management**: Secure credential handling
-
----
-
-## 🤝 Contributing
-
-This project is built as a SeedlingLabs internship assignment. For improvements:
-
-1. Create a new branch: `git checkout -b feature/your-feature`
-2. Make changes and commit: `git commit -m "Add feature description"`
-3. Push to GitHub: `git push origin feature/your-feature`
-4. Submit a pull request
-
----
-
-## 📋 Evaluation Checklist
-
-This project addresses all rubric criteria:
-
-- ✅ **Problem Solving & AI Acumen (40%)**
-  - Effective prompt engineering with JSON enforcement
-  - Robust system design with proper error handling
-  - Edge case management (no comments, long bodies)
-
-- ✅ **Code Quality & Engineering Practices (30%)**
-  - Clean, well-commented code
-  - Organized project structure
-  - Comprehensive README
-  - requirements.txt for dependency management
-
-- ✅ **Speed & Efficiency (20%)**
-  - Leverages FastAPI for performance
-  - Streamlit for rapid prototyping
-  - Direct LLM API calls (no unnecessary libraries)
-
-- ✅ **Communication & Initiative (10%)**
-  - Clear, descriptive commit messages
-  - Extra features: JSON copy button, tabs, health check endpoint
-  - Comprehensive error handling with user-friendly messages
-
----
-
-## 📞 Support
-
-For issues or questions:
-1. Check the [Troubleshooting](#-troubleshooting) section
-2. Review test cases in `tests/`
-3. Check API logs in the backend terminal
-4. Verify environment configuration
+## 🎯 Future Enhancements (Roadmap)
+
+Potential features to add:
+
+- [ ] **Theme customization**: Light/dark mode toggle with custom accent colors
+- [ ] **Persistent settings**: Remember API endpoint and last analyzed repo/issue
+- [ ] **Batch analysis**: Analyze multiple issues from same repo at once
+- [ ] **Export options**: Download results as CSV or Markdown
+- [ ] **Direct issue links**: Paste full GitHub issue URL (auto-extract repo and number)
+- [ ] **Analytics dashboard**: Show request latency, cache hit/miss rates
+- [ ] **Version endpoint**: Display build version and commit hash
+- [ ] **Retry logic**: Automatic retries with exponential backoff for transient failures
+- [ ] **Private repos**: OAuth support for analyzing private repository issues
+- [ ] **Custom prompts**: Allow users to customize analysis focus areas
 
 ---
 
 ## 📄 License
 
-This project is created for the SeedlingLabs Engineering Internship Program.
+MIT
 
 ---
 
 ## 🙏 Acknowledgments
 
-- Built for **SeedlingLabs** - AI-Native Product Development
-- Powered by **Groq (Llama 3.3 70B)**
-- Leveraging **GitHub API**
+- Built for **SeedlingLabs** – AI-Native Product Development Internship
+- Powered by **Groq (Llama 3.3 70B)** for fast LLM inference
+- Leveraging **GitHub REST API** for issue data
 - Developed with **FastAPI** and **Streamlit**
 
 ---
 
 **Ready to ship! 🚀**
 
-Created with dedication to "faster, smarter, and radically more efficient" AI-powered development.
+*Created with dedication to "faster, smarter, and radically more efficient" AI-powered development.*
