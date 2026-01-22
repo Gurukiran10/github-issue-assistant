@@ -597,7 +597,7 @@ This project is created for the SeedlingLabs Engineering Internship Program.
 ## 🙏 Acknowledgments
 
 - Built for **SeedlingLabs** - AI-Native Product Development
-- Powered by **Google Gemini API**
+- Powered by **Groq (Llama 3.3 70B)**
 - Leveraging **GitHub API**
 - Developed with **FastAPI** and **Streamlit**
 
