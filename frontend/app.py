@@ -21,8 +21,10 @@ st.set_page_config(
 st.title("🔍 GitHub Issue Assistant")
 st.markdown("Leverage AI to analyze GitHub issues and generate actionable insights")
 
-# Get backend URL from environment or use default
-default_backend_url = os.getenv("BACKEND_URL", "https://github-issue-assistant-backend.onrender.com")
+# Get backend URL from environment or use default, but override if an old host is configured
+default_backend_url = os.getenv("BACKEND_URL")
+if not default_backend_url or "github-issue-assistant-f33e" in default_backend_url:
+    default_backend_url = "https://github-issue-assistant-backend.onrender.com"
 
 # Sidebar configuration
 with st.sidebar:
